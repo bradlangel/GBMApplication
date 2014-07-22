@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
@@ -17,6 +19,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,6 +28,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 
 import java.util.List;
 
@@ -36,40 +41,30 @@ import static android.app.ProgressDialog.show;
 public class MainActivity extends ActionBarActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
-        LocationListener,
         AdapterView.OnItemClickListener{
-
-
 
     // Global constants
     public final static String EXTRA_MESSAGE = "com.bradlangel.myapplication.MESSAGE";
 
-    //Global constants for testing lat long
-    private final static String latitude = "40.686647";
-    private final static String longitude = "-73.991809";
-
-
+    //Global constants for lat long
+    private String latitude;
+    private String longitude;
 
     /*
      * Define a request code to send to Google Play services
      * This code is returned in Activity.onActivityResult
      */
-
     private final static int
             CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     //Location Client to be used by Google Play Services
     private LocationClient mLocationClient;
 
-
     // Global variable to hold the current location
     public Location mCurrentLocation;
 
-
     //Global variable to use for grabbing api data
     private final ApiCredentials apiCredentials = new ApiCredentials();
-
-
     List<GasStation> gasStations;
     ListView gasStationListView;
 
@@ -99,8 +94,47 @@ public class MainActivity extends ActionBarActivity implements
         // Connect the client.
         mLocationClient.connect();
 
+    }
+
+    /*
+   * Called when the Activity is no longer visible.
+   */
+    @Override
+    protected void onStop() {
+        // Disconnecting the client invalidates it.
+        mLocationClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        //Web Url for navigation
+        String navigationUrl = "google.navigation:q="+gasStations.get(position).getLocation().getLatitude()+ ","
+                                + gasStations.get(position).getLocation().getLongitude();
+
+        Intent navIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(navigationUrl));
+        startActivity(navIntent);
+
+    }
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+
+        //Grab Current Location
+        mCurrentLocation = mLocationClient.getLastLocation();
+        latitude = Double.toString(mCurrentLocation.getLatitude());
+        longitude = Double.toString(mCurrentLocation.getLongitude());
+
+        //Get Shared preferences from Settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String gasPref = sharedPref.getString(SettingsActivity.KEY_PREF_GAS, "");
+
 
         //Setup API call
         RequestInterceptor requestInterceptor = new RequestInterceptor() {
@@ -111,7 +145,7 @@ public class MainActivity extends ActionBarActivity implements
         };
 
 
-        RestAdapter restAdapter =  new RestAdapter.Builder()
+        RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(apiCredentials.getUrl())
                 .setRequestInterceptor(requestInterceptor)
                 .build();
@@ -124,29 +158,12 @@ public class MainActivity extends ActionBarActivity implements
                 longitude,
                 gasPref);
 
-        gasStationListView = (ListView)findViewById(R.id.list);
+        gasStationListView = (ListView) findViewById(R.id.list);
         GasStationAdaptor adaptor = new GasStationAdaptor(this, gasStations, gasPref);
         gasStationListView.setAdapter(adaptor);
 
         gasStationListView.setOnItemClickListener(this);
 
-
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        String station_name = gasStations.get(position).getLongName();
-        Toast.makeText(getApplicationContext(), "" + station_name,
-                Toast.LENGTH_SHORT).show();
-    }
-
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -156,9 +173,6 @@ public class MainActivity extends ActionBarActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
-            case R.id.action_search:
-                openSearch();
-                return true;
             case R.id.action_settings:
                 openSettings();
                 return true;
@@ -167,32 +181,10 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    private void openSearch() {
-
-
-        /*
-        mCurrentLocation = mLocationClient.getLastLocation();
-        String latitude = Double.toString(mCurrentLocation.getLatitude());
-        String longitude = Double.toString(mCurrentLocation.getLongitude());
-        */
-        Toast.makeText(this, "Latitude: "+ latitude + ", Longitude: " + longitude + "----"+ gasStations.get(0).getLongName(), Toast.LENGTH_SHORT).show();
-    }
-
     private void openSettings() {
         Toast.makeText(this, "Settings Button has been pressed", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
-    }
-
-
-    /*
-     * Called when the Activity is no longer visible.
-     */
-    @Override
-    protected void onStop() {
-        // Disconnecting the client invalidates it.
-        mLocationClient.disconnect();
-        super.onStop();
     }
 
 
@@ -298,7 +290,7 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
-        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
 
     }
 
@@ -358,20 +350,4 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-
-
-
-    /*
-        BEGIN: GOOGLE PLAY SERVICES: Location Update
-     */
-
-    // Define the callback method that receives location updates
-    @Override
-    public void onLocationChanged(Location location) {
-        // Report to the UI that the location was updated
-        String msg = "Updated Location: " +
-                Double.toString(location.getLatitude()) + "," +
-                Double.toString(location.getLongitude());
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
 }
