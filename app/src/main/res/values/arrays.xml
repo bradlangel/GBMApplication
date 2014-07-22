@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="gas_preference_entries">
+        <item>Regular</item>
+        <item>Plus</item>
+        <item>Premium</item>
+        <item>Diesel</item>
+    </array>
+    <array name="gas_preference_values">
+        <item>regular</item>
+        <item>plus</item>
+        <item>premium</item>
+        <item>diesel</item>
+    </array>
+</resources>
