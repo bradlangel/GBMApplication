@@ -24,8 +24,9 @@ public class GasStationAdaptor extends BaseAdapter {
     List<GasStation> gasStationList;
     String preference;
 
-    //Max length of String(distance, price) to be displayed on ListView output
-    final int maxLength = 2;
+    //Max length of String(e.g. distance, price) to be displayed on ListView output
+    final int distmaxLength = 2;
+    final int maxLength = 3;
 
 
     GasStationAdaptor(Context context, List<GasStation> gasStationList, String preference) {
@@ -52,7 +53,7 @@ public class GasStationAdaptor extends BaseAdapter {
     /* private viewHolder class */
     private class ViewHolder {
         ImageView gas_pic;
-        TextView station_name;
+        TextView  address;
         TextView distance;
         TextView price;
     }
@@ -69,7 +70,7 @@ public class GasStationAdaptor extends BaseAdapter {
         holder = new ViewHolder();
 
         holder.gas_pic = (ImageView) convertView.findViewById(R.id.gas_pic);
-        holder.station_name = (TextView) convertView.findViewById(R.id.station_name);
+        holder.address = (TextView) convertView.findViewById(R.id.address);
         holder.distance = (TextView) convertView.findViewById(R.id.distance);
         holder.price = (TextView) convertView.findViewById(R.id.price);
 
@@ -80,15 +81,11 @@ public class GasStationAdaptor extends BaseAdapter {
         //Use Picasso to place images into ImageView
         Picasso.with(context)
                 .load(gasStationPosition.getImageUrl())
-                .resize(70, 70)
+                .resize(100, 100)
                 .into(holder.gas_pic);
 
-
-
-        //Place data into text view variables
-        holder.station_name.setText(gasStationPosition.getLongName());
-
-        holder.distance.setText(Double.toString(round(gasStationPosition.getDistance(), maxLength)) + " mi");
+        //Place address into text view variables
+        holder.address.setText(gasStationPosition.getAddress());
 
         /*
          * Use preferences to find correct price to place in text view variable
@@ -99,6 +96,8 @@ public class GasStationAdaptor extends BaseAdapter {
             //If we want regular gas price but station has none then set holder to null
             if(regularPrice == 0.0) {
                 holder.price.setText("No Regular");
+                convertView.setTag(holder);
+                return convertView;
             } else {
                 holder.price.setText("$" + Double.toString(round(regularPrice, maxLength)));
             }
@@ -108,6 +107,8 @@ public class GasStationAdaptor extends BaseAdapter {
             //If we want premium gas price but station has none then set holder to null
             if(premiumPrice == 0.0) {
                 holder.price.setText("No Premium");
+                convertView.setTag(holder);
+                return convertView;
             } else {
                 holder.price.setText("$" + Double.toString(round(premiumPrice, maxLength)));
             }
@@ -117,6 +118,8 @@ public class GasStationAdaptor extends BaseAdapter {
             //If we want plus gas price but station has none then set holder to null
             if(plusPrice == 0.0) {
                 holder.price.setText("No Plus");
+                convertView.setTag(holder);
+                return convertView;
             } else {
                 holder.price.setText("$" + Double.toString(round(plusPrice, maxLength)));
             }
@@ -126,6 +129,8 @@ public class GasStationAdaptor extends BaseAdapter {
             //If we want diesel gas price but station has none then set holder to null
             if(dieselPrice == 0.0) {
                 holder.price.setText("No Diesel");
+                convertView.setTag(holder);
+                return convertView;
             } else {
                 holder.price.setText("$" + Double.toString(round(dieselPrice, maxLength)));
             }
@@ -134,6 +139,9 @@ public class GasStationAdaptor extends BaseAdapter {
             holder.price.setText("BAD PREFERENCE!: " + preference);
         }
 
+
+        //Place distance into text view variables
+        holder.distance.setText(Double.toString(round(gasStationPosition.getDistance(), distmaxLength)) + " mi");
 
 
         convertView.setTag(holder);
