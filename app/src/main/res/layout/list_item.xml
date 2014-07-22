@@ -14,30 +14,30 @@
         android:paddingRight="10dp" />
 
     <TextView
-        android:id="@+id/station_name"
+        android:id="@+id/distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_toRightOf="@+id/gas_pic"
         android:paddingBottom="10dp"
-        android:text="Station"
+        android:text="Distance"
         android:textSize="20sp" />
 
     <TextView
-        android:id="@+id/distance"
+        android:id="@+id/station_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/station_name"
-        android:layout_below="@+id/station_name"
-        android:text="distance"
+        android:layout_alignLeft="@+id/distance"
+        android:layout_below="@+id/distance"
+        android:text="Station Name"
         android:textSize="16sp" />
 
     <TextView
         android:id="@+id/price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/station_name"
-        android:layout_alignBottom="@+id/station_name"
+        android:layout_alignBaseline="@+id/distance"
+        android:layout_alignBottom="@+id/distance"
         android:layout_alignParentRight="true"
         android:text="price"
         android:textSize="16sp" />
