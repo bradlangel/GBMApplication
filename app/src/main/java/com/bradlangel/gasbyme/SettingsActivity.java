@@ -2,6 +2,7 @@ package com.bradlangel.gasbyme;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -15,6 +16,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.view.MenuItem;
 
 import java.util.List;
 
@@ -70,6 +72,20 @@ public class SettingsActivity extends PreferenceActivity  {
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_GAS));
 
 
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                startActivity(new Intent(SettingsActivity.this, MainActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /** {@inheritDoc} */

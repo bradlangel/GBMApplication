@@ -4,21 +4,21 @@
     <style name="AppTheme" parent="@style/Theme.AppCompat.Light">
 
         <!--Support Library compatibility -->
-        <item name="actionBarStyle">@style/MyActionBar</item>
+        <item name="actionBarStyle">@style/AppTheme.MyActionBar</item>
         <item name="actionMenuTextColor">@color/actionbar_text</item>
         <item name="windowActionBarOverlay">true</item>
     </style>
 
     <!-- MyActionBar style -->
-    <style name="MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+    <style name="AppTheme.MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
 
         <!--Support Library compatibility -->
         <item name="background">@drawable/ab_solid_</item>
-        <item name="titleTextStyle">@style/MyActionBarTitleText</item>
+        <item name="titleTextStyle">@style/AppTheme.MyActionBarTitleText</item>
 
     </style>
 
-    <style name="MyActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"  >
+    <style name="AppTheme.MyActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"  >
         <item name="android:textColor">@color/actionbar_text</item>
     </style>
 

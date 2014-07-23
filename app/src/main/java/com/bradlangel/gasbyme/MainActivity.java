@@ -1,34 +1,30 @@
 package com.bradlangel.gasbyme;
 
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.net.Uri;
-import android.os.Handler;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
+import android.location.Location;
+
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
 
 import java.util.List;
 
@@ -125,44 +121,6 @@ public class MainActivity extends ActionBarActivity implements
 
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-
-        //Grab Current Location
-        mCurrentLocation = mLocationClient.getLastLocation();
-        latitude = Double.toString(mCurrentLocation.getLatitude());
-        longitude = Double.toString(mCurrentLocation.getLongitude());
-
-        //Get Shared preferences from Settings
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String gasPref = sharedPref.getString(SettingsActivity.KEY_PREF_GAS, "");
-
-
-        //Setup API call
-        RequestInterceptor requestInterceptor = new RequestInterceptor() {
-            @Override
-            public void intercept(RequestFacade request) {
-                request.addHeader(apiCredentials.getKey(), apiCredentials.getValue());
-            }
-        };
-
-
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(apiCredentials.getUrl())
-                .setRequestInterceptor(requestInterceptor)
-                .build();
-
-        DashService dashApiService = restAdapter.create(DashService.class);
-
-
-        //Each call on the generated dashApiService makes an HTTP request to the remote web server.
-        gasStations = dashApiService.listGasStations(latitude,
-                longitude,
-                gasPref);
-
-        gasStationListView = (ListView) findViewById(R.id.list);
-        GasStationAdaptor adaptor = new GasStationAdaptor(this, gasStations, gasPref);
-        gasStationListView.setAdapter(adaptor);
-
-        gasStationListView.setOnItemClickListener(this);
 
         return true;
     }
@@ -291,6 +249,43 @@ public class MainActivity extends ActionBarActivity implements
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
         Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
+        //Grab Current Location
+        mCurrentLocation = mLocationClient.getLastLocation();
+        latitude = Double.toString(mCurrentLocation.getLatitude());
+        longitude = Double.toString(mCurrentLocation.getLongitude());
+
+        //Get Shared preferences from Settings
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String gasPref = sharedPref.getString(SettingsActivity.KEY_PREF_GAS, "");
+
+
+        //Setup API call
+        RequestInterceptor requestInterceptor = new RequestInterceptor() {
+            @Override
+            public void intercept(RequestFacade request) {
+                request.addHeader(apiCredentials.getKey(), apiCredentials.getValue());
+            }
+        };
+
+
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint(apiCredentials.getUrl())
+                .setRequestInterceptor(requestInterceptor)
+                .build();
+
+        DashService dashApiService = restAdapter.create(DashService.class);
+
+
+        //Each call on the generated dashApiService makes an HTTP request to the remote web server.
+        gasStations = dashApiService.listGasStations(latitude,
+                longitude,
+                gasPref);
+
+        gasStationListView = (ListView) findViewById(R.id.list);
+        GasStationAdaptor adaptor = new GasStationAdaptor(this, gasStations, gasPref);
+        gasStationListView.setAdapter(adaptor);
+
+        gasStationListView.setOnItemClickListener(this);
 
     }
 
