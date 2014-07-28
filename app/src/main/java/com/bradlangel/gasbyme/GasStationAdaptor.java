@@ -90,8 +90,8 @@ public class GasStationAdaptor extends BaseAdapter {
         /*
          * Use preferences to find correct price to place in text view variable
          */
-        if(preference.equals("regular")) {
 
+        if(preference.equals("regular")) {
             Double regularPrice =  gasStationPosition.getRegular();
             //If we want regular gas price but station has none then set holder to null
             if(regularPrice == 0.0) {
@@ -102,7 +102,6 @@ public class GasStationAdaptor extends BaseAdapter {
                 holder.price.setText("$" + Double.toString(round(regularPrice, maxLength)));
             }
         } else if(preference.equals("premium")) {
-
             Double premiumPrice =  gasStationPosition.getPremium();
             //If we want premium gas price but station has none then set holder to null
             if(premiumPrice == 0.0) {
@@ -113,7 +112,6 @@ public class GasStationAdaptor extends BaseAdapter {
                 holder.price.setText("$" + Double.toString(round(premiumPrice, maxLength)));
             }
         } else if(preference.equals("plus")) {
-
             Double plusPrice =  gasStationPosition.getPlus();
             //If we want plus gas price but station has none then set holder to null
             if(plusPrice == 0.0) {
@@ -124,7 +122,6 @@ public class GasStationAdaptor extends BaseAdapter {
                 holder.price.setText("$" + Double.toString(round(plusPrice, maxLength)));
             }
         } else if(preference.equals("diesel")) {
-
             Double dieselPrice =  gasStationPosition.getDiesel();
             //If we want diesel gas price but station has none then set holder to null
             if(dieselPrice == 0.0) {

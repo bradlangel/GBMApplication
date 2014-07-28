@@ -86,7 +86,6 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-
         // Connect the client.
         mLocationClient.connect();
 
@@ -118,10 +117,8 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-
         return true;
     }
 
@@ -180,7 +177,6 @@ public class MainActivity extends ActionBarActivity implements
             int requestCode, int resultCode, Intent data) {
         // Decide what to do based on the original request code
         switch (requestCode) {
-
             case CONNECTION_FAILURE_RESOLUTION_REQUEST :
             /*
              * If the result code is Activity.RESULT_OK, try
@@ -191,7 +187,6 @@ public class MainActivity extends ActionBarActivity implements
                     /*
                      * Try the request again
                      */
-
                         break;
                 }
 
