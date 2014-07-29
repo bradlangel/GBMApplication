@@ -28,10 +28,11 @@ import com.google.android.gms.location.LocationClient;
 
 import java.util.List;
 
+import retrofit.Callback;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
-
-import static android.app.ProgressDialog.show;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class MainActivity extends ActionBarActivity implements
@@ -244,6 +245,7 @@ public class MainActivity extends ActionBarActivity implements
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
         Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
+
         //Grab Current Location
         mCurrentLocation = mLocationClient.getLastLocation();
         latitude = Double.toString(mCurrentLocation.getLatitude());
@@ -251,7 +253,7 @@ public class MainActivity extends ActionBarActivity implements
 
         //Get Shared preferences from Settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String gasPref = sharedPref.getString(SettingsActivity.KEY_PREF_GAS, "");
+        final String gasPref = sharedPref.getString(SettingsActivity.KEY_PREF_GAS, "");
 
 
         //Setup API call
@@ -272,15 +274,17 @@ public class MainActivity extends ActionBarActivity implements
 
 
         //Each call on the generated dashApiService makes an HTTP request to the remote web server.
-        gasStations = dashApiService.listGasStations(latitude,
-                longitude,
-                gasPref);
+        dashApiService.getGasStations(latitude,longitude, gasPref, new Callback<List<GasStation>>() {
+            @Override
+            public void success(List<GasStation> gasStationList, Response response) {
+                consumeApi(gasStationList, gasPref);
+            }
 
-        gasStationListView = (ListView) findViewById(R.id.list);
-        GasStationAdaptor adaptor = new GasStationAdaptor(this, gasStations, gasPref);
-        gasStationListView.setAdapter(adaptor);
-
-        gasStationListView.setOnItemClickListener(this);
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                consumeApi(null, null);
+            }
+        });
 
     }
 
@@ -340,4 +344,19 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    public void consumeApi(List<GasStation> gasStationList, String gasPref) {
+        if (gasStationList != null) {
+            gasStations = gasStationList;
+            gasStationListView = (ListView) findViewById(R.id.list);
+            GasStationAdaptor adaptor = new GasStationAdaptor(this, gasStationList, gasPref);
+            gasStationListView.setAdapter(adaptor);
+
+            gasStationListView.setOnItemClickListener(this);
+        } else {
+            Toast.makeText(this, "NOTHING!!! HELLL", Toast.LENGTH_LONG).show();
+        }
+
+    }
 }
+
+
