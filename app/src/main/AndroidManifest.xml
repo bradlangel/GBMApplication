@@ -26,14 +26,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bradlangel.gasbyme.DisplayMessageActivity"
-            android:label="@string/title_activity_display_message"
-            android:parentActivityName="com.bradlangel.gasbyme.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.bradlangel.gasbyme.MainActivity" />
-        </activity>
-        <activity
             android:name="com.bradlangel.gasbyme.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName="com.bradlangel.gasbyme.MainActivity">
