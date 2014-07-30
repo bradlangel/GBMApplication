@@ -17,6 +17,7 @@ import java.util.List;
 
 /**
  * Created by bradlangel on 7/21/14.
+ * Adapter to display Gas Station information
  */
 public class GasStationAdaptor extends BaseAdapter {
 
@@ -25,9 +26,8 @@ public class GasStationAdaptor extends BaseAdapter {
     String preference;
 
     //Max length of String(e.g. distance, price) to be displayed on ListView output
-    final int distmaxLength = 2;
-    final int maxLength = 3;
-
+    static final int distmaxLength = 2;
+    static final int maxLength = 3;
 
     GasStationAdaptor(Context context, List<GasStation> gasStationList, String preference) {
         this.context = context;
@@ -91,41 +91,41 @@ public class GasStationAdaptor extends BaseAdapter {
          * Use preferences to find correct price to place in text view variable
          */
 
-        if(preference.equals("regular")) {
+        if(preference.equals(this.context.getString(R.string.regular))) {
             Double regularPrice =  gasStationPosition.getRegular();
             //If we want regular gas price but station has none then set holder to null
             if(regularPrice == 0.0) {
-                holder.price.setText("No Regular");
+                holder.price.setText(this.context.getString(R.string.no_regular));
                 convertView.setTag(holder);
                 return convertView;
             } else {
                 holder.price.setText("$" + Double.toString(round(regularPrice, maxLength)));
             }
-        } else if(preference.equals("premium")) {
+        } else if(preference.equals(this.context.getString(R.string.premium))) {
             Double premiumPrice =  gasStationPosition.getPremium();
             //If we want premium gas price but station has none then set holder to null
             if(premiumPrice == 0.0) {
-                holder.price.setText("No Premium");
+                holder.price.setText(this.context.getString(R.string.no_premium));
                 convertView.setTag(holder);
                 return convertView;
             } else {
                 holder.price.setText("$" + Double.toString(round(premiumPrice, maxLength)));
             }
-        } else if(preference.equals("plus")) {
+        } else if(preference.equals(this.context.getString(R.string.plus))) {
             Double plusPrice =  gasStationPosition.getPlus();
             //If we want plus gas price but station has none then set holder to null
             if(plusPrice == 0.0) {
-                holder.price.setText("No Plus");
+                holder.price.setText(this.context.getString(R.string.no_plus));
                 convertView.setTag(holder);
                 return convertView;
             } else {
                 holder.price.setText("$" + Double.toString(round(plusPrice, maxLength)));
             }
-        } else if(preference.equals("diesel")) {
+        } else if(preference.equals(this.context.getString(R.string.diesel))) {
             Double dieselPrice =  gasStationPosition.getDiesel();
             //If we want diesel gas price but station has none then set holder to null
             if(dieselPrice == 0.0) {
-                holder.price.setText("No Diesel");
+                holder.price.setText(this.context.getString(R.string.no_diesel));
                 convertView.setTag(holder);
                 return convertView;
             } else {
@@ -133,12 +133,12 @@ public class GasStationAdaptor extends BaseAdapter {
             }
         } else {
 
-            holder.price.setText("BAD PREFERENCE!: " + preference);
+            holder.price.setText(this.context.getString(R.string.bad_preference) + ": " + preference);
         }
 
 
         //Place distance into text view variables
-        holder.distance.setText(Double.toString(round(gasStationPosition.getDistance(), distmaxLength)) + " mi");
+        holder.distance.setText(Double.toString(round(gasStationPosition.getDistance(), distmaxLength)) + this.context.getString(R.string.miles));
 
 
         convertView.setTag(holder);
