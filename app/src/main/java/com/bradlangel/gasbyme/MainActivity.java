@@ -40,12 +40,6 @@ public class MainActivity extends ActionBarActivity implements
         GooglePlayServicesClient.OnConnectionFailedListener,
         AdapterView.OnItemClickListener{
 
-    // Global constants
-    public final static String EXTRA_MESSAGE = "com.bradlangel.myapplication.MESSAGE";
-
-    //Global constants for lat long
-    private String latitude;
-    private String longitude;
 
     /*
      * Define a request code to send to Google Play services
@@ -58,7 +52,11 @@ public class MainActivity extends ActionBarActivity implements
     private LocationClient mLocationClient;
 
     // Global variable to hold the current location
-    public Location mCurrentLocation;
+    private Location mCurrentLocation;
+
+    //Global variable to hold latitude and longitude values
+    private String latitude;
+    private String longitude;
 
     //Global variable to use for grabbing api data
     private final ApiCredentials apiCredentials = new ApiCredentials();
@@ -93,8 +91,8 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     /*
-   * Called when the Activity is no longer visible.
-   */
+     * Called when the Activity is no longer visible.
+     */
     @Override
     protected void onStop() {
         // Disconnecting the client invalidates it.
@@ -102,6 +100,9 @@ public class MainActivity extends ActionBarActivity implements
         super.onStop();
     }
 
+    /*
+     * If list-view adapter item is clicked then start up navigation
+     */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -123,6 +124,9 @@ public class MainActivity extends ActionBarActivity implements
         return true;
     }
 
+    /*
+     * Check to see what menu option has been selected
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -137,6 +141,9 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    /*
+     * Start Settings Activity
+     */
     private void openSettings() {
         Toast.makeText(this, "Settings Button has been pressed", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(this, SettingsActivity.class);
@@ -299,6 +306,7 @@ public class MainActivity extends ActionBarActivity implements
                 Toast.LENGTH_SHORT).show();
     }
 
+
     /*
      * Called by Location Services if the attempt to
      * Location Services fails.
@@ -344,7 +352,11 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    /*
+     * Sets up listview adaptor after api call
+     */
     public void consumeApi(List<GasStation> gasStationList, String gasPref) {
+        //Make sure list isn't null
         if (gasStationList != null) {
             gasStations = gasStationList;
             gasStationListView = (ListView) findViewById(R.id.list);
@@ -352,8 +364,8 @@ public class MainActivity extends ActionBarActivity implements
             gasStationListView.setAdapter(adaptor);
 
             gasStationListView.setOnItemClickListener(this);
-        } else {
-            Toast.makeText(this, "NOTHING!!! HELLL", Toast.LENGTH_LONG).show();
+        } else { //Give user reason for blank screen
+            Toast.makeText(this, "No Api Data", Toast.LENGTH_LONG).show();
         }
 
     }
