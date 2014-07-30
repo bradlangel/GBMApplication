@@ -365,7 +365,12 @@ public class MainActivity extends ActionBarActivity implements
 
             gasStationListView.setOnItemClickListener(this);
         } else { //Give user reason for blank screen
-            Toast.makeText(this, "No Api Data", Toast.LENGTH_LONG).show();
+            if(gasPref != null) {
+                Toast.makeText(this, "Retrofit Failure", Toast.LENGTH_LONG).show();
+            }else {
+                Toast.makeText(this, "No Api Data", Toast.LENGTH_LONG).show();
+            }
+
         }
 
     }
