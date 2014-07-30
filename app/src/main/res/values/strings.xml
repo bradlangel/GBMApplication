@@ -12,5 +12,16 @@
     <string name="gas_preference">Your Gas Preference</string>
     <string name="pref_gas_default">regular</string>
     <string name="loading">LOADING</string>
+    <string name="regular">regular</string>
+    <string name="premium">premium</string>
+    <string name="plus">plus</string>
+    <string name="diesel">diesel</string>
+    <string name="no_regular">No Regular</string>
+    <string name="no_premium">No Premium</string>
+    <string name="no_plus">No Plus</string>
+    <string name="no_diesel">No Diesel</string>
+    <string name="bad_preference">Non-existent PREFERENCE!</string>
+    <string name="miles"> mi</string>
+
 
 </resources>
