@@ -4,7 +4,7 @@ package com.bradlangel.gasbyme;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GasStation {
+public class GasStation implements Comparable<GasStation> {
 
     //Immutable fields
     private final String id;
@@ -44,6 +44,65 @@ public class GasStation {
         this.distance = distance;
         this.diesel = diesel;
     }
+
+    /*
+    * Equals
+    */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GasStation)) return false;
+
+        GasStation that = (GasStation) o;
+
+        if (dateTime != that.dateTime) return false;
+        if (Double.compare(that.diesel, diesel) != 0) return false;
+        if (Double.compare(that.plus, plus) != 0) return false;
+        if (Double.compare(that.premium, premium) != 0) return false;
+        if (Double.compare(that.regular, regular) != 0) return false;
+        if (!address.equals(that.address)) return false;
+        if (!name.equals(that.name)) return false;
+        if (!zip.equals(that.zip)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = (int) (dateTime ^ (dateTime >>> 32));
+        result = 31 * result + name.hashCode();
+        result = 31 * result + address.hashCode();
+        temp = Double.doubleToLongBits(regular);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(plus);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(premium);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(diesel);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    /*
+     * Default is 'Regular' gas type
+     */
+    @Override
+    public int compareTo(GasStation other) {
+        // compareTo should return < 0 if this is supposed to be
+        // less than other, > 0 if this is supposed to be greater than
+        // other and 0 if they are supposed to be equal
+        if (this.regular >= other.getRegular()) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+
+    /*
+     * Getters
+     */
     public String getId() {
         return id;
     }
