@@ -3,9 +3,12 @@ package com.bradlangel.gasbyme;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.location.Criteria;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -25,6 +28,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -39,8 +45,8 @@ import retrofit.client.Response;
 public class MainActivity extends ActionBarActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
-        AdapterView.OnItemClickListener{
-
+        AdapterView.OnItemClickListener,
+        LocationListener {
 
     /*
      * Define a request code to send to Google Play services
@@ -49,11 +55,30 @@ public class MainActivity extends ActionBarActivity implements
     private final static int
             CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
+    // Milliseconds per second
+    private static final int MILLISECONDS_PER_SECOND = 1000;
+    // Update frequency in seconds
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 45;
+    // Update frequency in milliseconds
+    private static final long UPDATE_INTERVAL =
+            MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
+    // The fastest update frequency, in seconds
+    private static final int FASTEST_INTERVAL_IN_SECONDS = 30;
+    // A fast frequency ceiling in milliseconds
+    private static final long FASTEST_INTERVAL =
+            MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
+
     //Location Client to be used by Google Play Services
     private LocationClient mLocationClient;
 
     // Global variable to hold the current location
     private Location mCurrentLocation;
+
+    // Define an object that holds accuracy and frequency parameters
+    private LocationRequest mLocationRequest;
+
+    //Boolean to hold whether an update has been requested
+    private boolean mUpdatesRequested;
 
     //Global variable to hold latitude and longitude values
     private String latitude;
@@ -61,9 +86,13 @@ public class MainActivity extends ActionBarActivity implements
 
     //Global variable to use for grabbing api data
     private final ApiCredentials apiCredentials = new ApiCredentials();
-    List<GasStation> gasStations;
-    ListView gasStationListView;
+    public List<GasStation> gasStations;
+    public ListView gasStationListView;
 
+    //private preference for Location Updates
+    private SharedPreferences mPrefs;
+    //private editor to make changes to preference
+    private SharedPreferences.Editor mEditor;
 
 
     @Override
@@ -71,11 +100,30 @@ public class MainActivity extends ActionBarActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Open the shared preferences
+        mPrefs = getSharedPreferences("SharedPreferences",
+                Context.MODE_PRIVATE);
+        // Get a SharedPreferences editor
+        mEditor = mPrefs.edit();
+
         /*
          * Create a new location client, using the enclosing class to
          * handle callbacks.
          */
         mLocationClient = new LocationClient(this, this, this);
+
+        // Create the LocationRequest object
+        mLocationRequest = LocationRequest.create();
+        // Use high accuracy
+        mLocationRequest.setPriority(
+                LocationRequest.PRIORITY_HIGH_ACCURACY);
+        // Set the update interval to 5 seconds
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        // Set the fastest update interval to 1 second
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+
+        // Start with updates turned off
+        mUpdatesRequested = false;
 
     }
 
@@ -91,12 +139,50 @@ public class MainActivity extends ActionBarActivity implements
 
     }
 
+    @Override
+    protected void onPause() {
+        // Save the current setting for updates
+        mEditor.putBoolean("KEY_UPDATES_ON", mUpdatesRequested);
+        mEditor.commit();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        /*
+         * Get any previous setting for location updates
+         * Gets "false" if an error occurs
+         */
+        if (mPrefs.contains("KEY_UPDATES_ON")) {
+            mUpdatesRequested =
+                    mPrefs.getBoolean("KEY_UPDATES_ON", false);
+
+            // Otherwise, turn off location updates
+        } else {
+            mEditor.putBoolean("KEY_UPDATES_ON", false);
+            mEditor.commit();
+        }
+        super.onResume();
+    }
+
     /*
      * Called when the Activity is no longer visible.
      */
     @Override
     protected void onStop() {
-        // Disconnecting the client invalidates it.
+        // If the client is connected
+        if (mLocationClient.isConnected()) {
+            /*
+             * Remove location updates for a listener.
+             * The current Activity is the listener, so
+             * the argument is "this".
+             */
+            mLocationClient.removeLocationUpdates(this);
+        }
+        /*
+         * After disconnect() is called, the client is
+         * considered "dead".
+         */
         mLocationClient.disconnect();
         super.onStop();
     }
@@ -254,45 +340,14 @@ public class MainActivity extends ActionBarActivity implements
         // Display the connection status
         Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
 
-        //Grab Current Location
-        mCurrentLocation = mLocationClient.getLastLocation();
-        latitude = Double.toString(mCurrentLocation.getLatitude());
-        longitude = Double.toString(mCurrentLocation.getLongitude());
+        //Grab Current Location with exception handling
+        getCurrentLocation();
 
-        //Get Shared preferences from Settings
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        final String gasPref = sharedPref.getString(SettingsActivity.KEY_PREF_GAS, "");
-
-
-        //Setup API call
-        RequestInterceptor requestInterceptor = new RequestInterceptor() {
-            @Override
-            public void intercept(RequestFacade request) {
-                request.addHeader(apiCredentials.getKey(), apiCredentials.getValue());
-            }
-        };
-
-
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(apiCredentials.getUrl())
-                .setRequestInterceptor(requestInterceptor)
-                .build();
-
-        DashService dashApiService = restAdapter.create(DashService.class);
-
-
-        //Each call on the generated dashApiService makes an HTTP request to the remote web server.
-        dashApiService.getGasStations(latitude,longitude, gasPref, new Callback<List<GasStation>>() {
-            @Override
-            public void success(List<GasStation> gasStationList, Response response) {
-                consumeApi(gasStationList, gasPref);
-            }
-
-            @Override
-            public void failure(RetrofitError retrofitError) {
-                consumeApi(null, null);
-            }
-        });
+        /*
+         * User retrofit to make call to api
+         * Setup listview adapter with api data
+         */
+        setupAdapter();
 
     }
 
@@ -369,12 +424,112 @@ public class MainActivity extends ActionBarActivity implements
             if(gasPref != null) {
                 Toast.makeText(this, "Retrofit Failure", Toast.LENGTH_LONG).show();
             }else {
-                Toast.makeText(this, "No Api Data", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "No Api Data: " + gasPref, Toast.LENGTH_LONG).show();
             }
 
         }
 
     }
+
+    // Define the callback method that receives location updates
+    @Override
+    public void onLocationChanged(Location location) {
+        // Report to the UI that the location was updated
+        String msg = "Updated Location: " +
+                Double.toString(location.getLatitude()) + "," +
+                Double.toString(location.getLongitude());
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        /*
+         * User retrofit to make call to api
+         * Setup ListView adapter with api data
+         */
+        setupAdapter();
+        /*
+         * This tells us we have a location fix
+         * Thus, turn off Update requests
+         */
+        mUpdatesRequested  = false;
+        // If the client is connected
+        if (mLocationClient.isConnected()) {
+            /*
+             * Remove location updates for a listener.
+             */
+            mLocationClient.removeLocationUpdates(this);
+        }
+    }
+    /*
+     * Used to grab current location.
+     * Makes sure null pointer exceptions are caught and dealt with.
+     */
+    public void getCurrentLocation() {
+        try
+        {
+            // If already requested, start periodic updates
+            if(mUpdatesRequested) {
+               mLocationClient.requestLocationUpdates(mLocationRequest, this);
+            }
+            mCurrentLocation = mLocationClient.getLastLocation();
+            latitude = Double.toString(mCurrentLocation.getLatitude());
+            longitude = Double.toString(mCurrentLocation.getLongitude());
+        }
+        catch (NullPointerException ne)
+        {
+            Log.e("Current Location", "Current Lat Lng is Null");
+            Toast.makeText(this, "Null latLNG", Toast.LENGTH_SHORT).show();
+            mUpdatesRequested = true;
+            // Save the current setting for updates
+            mEditor.putBoolean("KEY_UPDATES_ON", mUpdatesRequested);
+            mEditor.commit();
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+     * User retrofit to make call to api
+     * Setup ListView adapter with api data
+     */
+    public void setupAdapter(){
+
+        //Get Shared preferences from Settings
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        final String gasPref = sharedPref.getString(SettingsActivity.KEY_PREF_GAS, "");
+
+
+        //Setup API call
+        RequestInterceptor requestInterceptor = new RequestInterceptor() {
+            @Override
+            public void intercept(RequestFacade request) {
+                request.addHeader(apiCredentials.getKey(), apiCredentials.getValue());
+            }
+        };
+
+
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint(apiCredentials.getUrl())
+                .setRequestInterceptor(requestInterceptor)
+                .build();
+
+        DashService dashApiService = restAdapter.create(DashService.class);
+
+
+        //Each call on the generated dashApiService makes an HTTP request to the remote web server.
+        dashApiService.getGasStations(latitude,longitude, gasPref, new Callback<List<GasStation>>() {
+            @Override
+            public void success(List<GasStation> gasStationList, Response response) {
+                consumeApi(gasStationList, gasPref);
+            }
+
+            @Override
+            public void failure(RetrofitError retrofitError) {
+                consumeApi(null, null);
+            }
+        });
+    }
+
 }
 
 
