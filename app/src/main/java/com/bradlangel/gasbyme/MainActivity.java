@@ -26,6 +26,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 
+import java.text.NumberFormat;
 import java.util.List;
 
 import retrofit.Callback;
@@ -355,7 +356,7 @@ public class MainActivity extends ActionBarActivity implements
     /*
      * Sets up listview adaptor after api call
      */
-    public void consumeApi(List<GasStation> gasStationList, String gasPref) {
+    private void consumeApi(List<GasStation> gasStationList, String gasPref) {
         //Make sure list isn't null
         if (gasStationList != null) {
             gasStations = gasStationList;
