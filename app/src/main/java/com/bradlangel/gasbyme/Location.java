@@ -7,51 +7,36 @@ import java.util.Map;
 
 public class Location {
 
-    private String _class;
-    private String id;
-    private long dateTime;
-    private double latitude;
-    private double longitude;
+
+    //Immutable fields
+    private final String id;
+    private final long dateTime;
+    private final double latitude;
+    private final double longitude;
+
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    public String getClass_() {
-        return _class;
-    }
-
-    public void setClass_(String _class) {
-        this._class = _class;
+    public Location(String id, long dateTime, double latitude, double longitude) {
+        this.id = id;
+        this.dateTime = dateTime;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public long getDateTime() {
         return dateTime;
-    }
-
-    public void setDateTime(int dateTime) {
-        this.dateTime = dateTime;
     }
 
     public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
     public double getLongitude() {
         return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
     }
 
     public Map<String, Object> getAdditionalProperties() {
