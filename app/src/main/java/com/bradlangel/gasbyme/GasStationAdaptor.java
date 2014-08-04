@@ -81,7 +81,6 @@ public class GasStationAdaptor extends BaseAdapter {
         //Use Picasso to place images into ImageView
         Picasso.with(context)
                 .load(gasStationPosition.getImageUrl())
-                .resize(100, 100)
                 .into(holder.gas_pic);
 
         //Place address into text view variables
@@ -91,17 +90,7 @@ public class GasStationAdaptor extends BaseAdapter {
          * Use preferences to find correct price to place in text view variable
          */
 
-        if(preference.equals(this.context.getString(R.string.regular))) {
-            Double regularPrice =  gasStationPosition.getRegular();
-            //If we want regular gas price but station has none then set holder to null
-            if(regularPrice == 0.0) {
-                holder.price.setText(this.context.getString(R.string.no_regular));
-                convertView.setTag(holder);
-                return convertView;
-            } else {
-                holder.price.setText("$" + Double.toString(round(regularPrice, maxLength)));
-            }
-        } else if(preference.equals(this.context.getString(R.string.premium))) {
+        if(preference.equals(this.context.getString(R.string.premium))) {
             Double premiumPrice =  gasStationPosition.getPremium();
             //If we want premium gas price but station has none then set holder to null
             if(premiumPrice == 0.0) {
@@ -133,7 +122,15 @@ public class GasStationAdaptor extends BaseAdapter {
             }
         } else {
 
-            holder.price.setText(this.context.getString(R.string.bad_preference) + ": " + preference);
+            Double regularPrice =  gasStationPosition.getRegular();
+            //If we want regular gas price but station has none then set holder to null
+            if(regularPrice == 0.0) {
+                holder.price.setText(this.context.getString(R.string.no_regular));
+                convertView.setTag(holder);
+                return convertView;
+            } else {
+                holder.price.setText("$" + Double.toString(round(regularPrice, maxLength)));
+            }
         }
 
 
