@@ -5,7 +5,7 @@ android {
     buildToolsVersion '20.0.0'
 
     defaultConfig {
-        applicationId "com.bradlangel.myapplication"
+        applicationId "com.bradlangel.gasbyme"
         minSdkVersion 9
         targetSdkVersion 20
         versionCode 1
@@ -21,7 +21,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-
     // You must install or update the Support Repository through the SDK manager to use this dependency.
     compile 'com.android.support:support-v4:20+'
     compile 'com.google.android.gms:play-services:5.0.77'
