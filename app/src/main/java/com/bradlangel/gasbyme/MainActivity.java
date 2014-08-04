@@ -7,8 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.location.Criteria;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,9 +28,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.maps.model.LatLng;
 
-import java.text.NumberFormat;
 import java.util.List;
 
 import retrofit.Callback;
@@ -94,6 +90,11 @@ public class MainActivity extends ActionBarActivity implements
     //private editor to make changes to preference
     private SharedPreferences.Editor mEditor;
 
+    //private preference for On Connection is called
+    private SharedPreferences cPrefs;
+    //private editor to make changes to preference
+    private SharedPreferences.Editor cEditor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,9 +135,9 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     protected void onStart() {
         super.onStart();
+
         // Connect the client.
         mLocationClient.connect();
-
     }
 
     @Override
@@ -149,6 +150,7 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     protected void onResume() {
+
         /*
          * Get any previous setting for location updates
          * Gets "false" if an error occurs
@@ -162,6 +164,7 @@ public class MainActivity extends ActionBarActivity implements
             mEditor.putBoolean("KEY_UPDATES_ON", false);
             mEditor.commit();
         }
+
         super.onResume();
     }
 
@@ -232,7 +235,7 @@ public class MainActivity extends ActionBarActivity implements
      * Start Settings Activity
      */
     private void openSettings() {
-        Toast.makeText(this, "Settings Button has been pressed", Toast.LENGTH_LONG).show();
+
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
@@ -337,16 +340,15 @@ public class MainActivity extends ActionBarActivity implements
      */
     @Override
     public void onConnected(Bundle dataBundle) {
-        // Display the connection status
-        Toast.makeText(this, "Connected", Toast.LENGTH_LONG).show();
 
+        Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
         //Grab Current Location with exception handling
         getCurrentLocation();
 
-        /*
-         * User retrofit to make call to api
-         * Setup listview adapter with api data
-         */
+            /*
+             * User retrofit to make call to api
+             * Setup listview adapter with api data
+             */
         setupAdapter();
 
     }
@@ -358,7 +360,7 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onDisconnected() {
         // Display the connection status
-        Toast.makeText(this, "Disconnected. Please re-connect.",
+        Toast.makeText(this, "Disconnected Location Services. Please re-connect.",
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -434,11 +436,7 @@ public class MainActivity extends ActionBarActivity implements
     // Define the callback method that receives location updates
     @Override
     public void onLocationChanged(Location location) {
-        // Report to the UI that the location was updated
-        String msg = "Updated Location: " +
-                Double.toString(location.getLatitude()) + "," +
-                Double.toString(location.getLongitude());
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+
         /*
          * User retrofit to make call to api
          * Setup ListView adapter with api data
